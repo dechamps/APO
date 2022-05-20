@@ -29,6 +29,9 @@ For example, the following key contains APO configuration for the
 HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\MMDevices\Audio\Render\{b39fc22d-4c5d-4e65-8276-db7f999d2d06}\FxProperties
 ```
 
+The initial configuration comes from the driver store, which is itself populated
+[from the audio device driver INF file][inf].
+
 ## Useful links
 
 - [Audio Processing Object Architecture][apo]
@@ -44,4 +47,5 @@ HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\MMDevices\Audio\Ren
 [enum]: https://matthewvaneerde.wordpress.com/2010/06/03/how-to-enumerate-wasapi-audio-processing-objects-apos-on-your-system/
 [Equalizer APO]: https://sourceforge.net/projects/equalizerapo/
 [Etienne Dechamps]: mailto:etienne@edechamps.fr
+[inf]: https://docs.microsoft.com/en-us/windows-hardware/drivers/audio/implementing-audio-processing-objects#registering-apos-for-processing-modes-and-effects-in-the-inf-file
 [vista]: https://download.microsoft.com/download/9/c/5/9c5b2167-8017-4bae-9fde-d599bac8184a/sysfx.doc
