@@ -36,10 +36,12 @@ HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\MMDevices\Audio\Ren
 - [Audio Endpoint Devices][endpoint]
 - [Custom Audio Effects in Windows Vista][vista] (notably explains the meaning
   of the deprecated LFX and GFX APO placements)
+- [Enumerate APOs][enum]
 
 [apo]: https://docs.microsoft.com/en-us/windows-hardware/drivers/audio/audio-processing-object-architecture
 [eapodev]: https://sourceforge.net/p/equalizerapo/wiki/Developer%20documentation/
 [endpoint]: https://docs.microsoft.com/en-us/windows/win32/coreaudio/audio-endpoint-devices
+[enum]: https://matthewvaneerde.wordpress.com/2010/06/03/how-to-enumerate-wasapi-audio-processing-objects-apos-on-your-system/
 [Equalizer APO]: https://sourceforge.net/projects/equalizerapo/
 [Etienne Dechamps]: mailto:etienne@edechamps.fr
 [vista]: https://download.microsoft.com/download/9/c/5/9c5b2167-8017-4bae-9fde-d599bac8184a/sysfx.doc
