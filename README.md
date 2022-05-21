@@ -71,8 +71,10 @@ of the Windows audio pipeline:
 The above describes the modern sAPO architecture as it was introduced in Windows
 8.1. Previously, different kinds of APOs were used:
 
-- **Local Effect (LFX)** APOs serve the same purpose as SFX APOs.
-- **Global Effect (GFX)** APOs serve the same purpose as EFX APOs.
+- **Local Effect (LFX)** APOs, also known as *pre-mix* APOs, serve the same
+  purpose as SFX APOs.
+- **Global Effect (GFX)** APOs, also known as *post-mix* APOs, serve the same
+  purpose as EFX APOs.
 
 LFX and GFX APOs can still be used in modern versions of Windows, but Microsoft
 does not document them anymore; they should be considered deprecated. If both
