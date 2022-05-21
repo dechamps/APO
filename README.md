@@ -269,8 +269,8 @@ You can use the Registry Editor to make a backup of the contents of the registry
 key before running the above command so that you can restore them later. Another
 way to revert to the default state is to reinstall the audio driver.
 
-The same result by deleting or renaming the `FxProperties` key, but permissions
-might get in the way (see below).
+The same result can be achieved by deleting or renaming the `FxProperties` key,
+but permissions might get in the way (see below).
 
 ### Permission issues
 
