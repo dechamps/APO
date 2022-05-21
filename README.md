@@ -209,9 +209,6 @@ are:
 | LFX  | `{d04e05a6-594b-4fb6-a80d-01af5eed7d1d},1` | `PKEY_FX_PreMixEffectClsid`       |
 | GFX  | `{d04e05a6-594b-4fb6-a80d-01af5eed7d1d},2` | `PKEY_FX_PostMixEffectClsid`      |
 
-These are string properties whose value is the [CLSID][] of the COM class that
-implements the APO.
-
 If any of SFX, MFX or EFX are present, then LFX and GFX are ignored.
 
 All properties are optional. If no properties are present, or if the
@@ -221,6 +218,38 @@ Another notable property is [`PKEY_AudioEndpoint_Disable_SysFx`][]
 (`{1da5d803-d492-4edd-8c23-e0c0ffee7f0e},5`, DWORD), which, if set to 1,
 disables all sAPOs. It is mapped to the "Enable audio enhancements" checkbox in
 the Windows audio device settings.
+
+### Locating an sAPO
+
+The string value of a `PKEY_FX_*EffectClsid` property is a [CLSID][] which
+identifies the specific APO COM class to instantiate to filter the audio signal.
+CLSIDs are globally unique and chosen by the sAPO developer, so they can be
+expected to be stable even across different machines and OS versions.
+
+When a sAPO is installed, it is registered in the system-wide COM class store
+found at `HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID` so that it can be looked up
+by its CLSID.
+
+For example, the following command will look up information about CLSID
+`{EC1CC9CE-FAED-4822-828A-82A81A6F018F}` which is the [Equalizer APO][] GFX
+sAPO:
+
+```powershell
+$RegistryKey = (Get-Item "HKLM:\SOFTWARE\Classes\CLSID\{EC1CC9CE-FAED-4822-828A-82A81A6F018F}")
+$RegistryKey.GetValue("")
+$RegistryKey.OpenSubKey("InprocServer32").GetValue("")
+```
+
+Example output:
+
+```
+EqualizerAPO Post-Mix Class
+C:\Program Files\EqualizerAPO\EqualizerAPO.dll
+```
+
+In this example `EqualizerAPO.dll` is the DLL that contains the sAPO code. The
+Windows Audio engine `audiodg.exe` process will load that DLL to instantiate the
+filter and process the audio.
 
 ### How to remove all sAPOs
 
