@@ -180,10 +180,46 @@ Windows updates reinstall all audio drivers as a side effect.
 In code, the proper way to enumerate audio endpoints is to use
 [`IMMDeviceEnumerator::EnumAudioEndpoints()`][EnumAudioEndpoints].
 
+### `FxProperties` values
+
+The `FxProperties` registry key holds the system effect APO configuration for a
+specific audio endpoint device.
+
+The configuration is organized as a set of registry values, which correspond
+to individual properties. A property is identified by a GUID, followed by a
+comma `,`, followed by a number. For example:
+`{b725f130-47ef-101a-a5f1-02608c9eebac},10`.
+
+The official list of supported system effect APO properties can be found in the
+[audio driver INF settings][infsettings] documentation (look for properties
+that are installed under `HKR,FX\0` in the INF File Sample).  Alternatively,
+the `audioenginebaseapo.idl` file in the [Windows SDK][] contains a more
+exhaustive list (e.g. it includes legacy LFX/GFX properties).
+
+The most important properties are those that control which sAPOs are used. These
+are:
+
+| Type | Property ID                                | Property name                     |
+|------|--------------------------------------------|-----------------------------------|
+| SFX  | `{d04e05a6-594b-4fb6-a80d-01af5eed7d1d},5` | [`PKEY_FX_StreamEffectClsid`][]   |
+| MFX  | `{d04e05a6-594b-4fb6-a80d-01af5eed7d1d},6` | [`PKEY_FX_ModeEffectClsid`][]     |
+| EFX  | `{d04e05a6-594b-4fb6-a80d-01af5eed7d1d},7` | [`PKEY_FX_EndpointEffectClsid`][] |
+| LFX  | `{d04e05a6-594b-4fb6-a80d-01af5eed7d1d},1` | `PKEY_FX_PreMixEffectClsid`       |
+| GFX  | `{d04e05a6-594b-4fb6-a80d-01af5eed7d1d},2` | `PKEY_FX_PostMixEffectClsid`      |
+
+These are string properties whose value is the [CLSID][] of the COM class that
+implements the APO.
+
+If any of SFX, MFX or EFX are present, then LFX and GFX are ignored.
+
+All properties are optional. If no properties are present, or if the
+`FxProperties` key is absent entirely, then no system effect APOs are used.
+
 ## Useful links
 
 - [Windows Audio Architecture][arch]
 - [Audio Processing Object Architecture][apo]
+- [Audio INF File Settings][infsettings]
 - [Equalizer APO][], notably the [developer documentation][eapodev]
 - [Audio Endpoint Devices][endpoint]
 - [Custom Audio Effects in Windows Vista][vista] (notably explains the meaning
@@ -196,6 +232,7 @@ In code, the proper way to enumerate audio endpoints is to use
 [ASIO]: https://en.wikipedia.org/wiki/Audio_Stream_Input/Output
 [asrdebate]: https://www.audiosciencereview.com/forum/index.php?threads/ending-the-windows-audio-quality-debate.19438/
 [bundled]: https://docs.microsoft.com/en-us/windows-hardware/drivers/audio/audio-signal-processing-modes#audio-effects
+[CLSID]: https://docs.microsoft.com/en-us/windows/win32/com/com-class-objects-and-clsids
 [COM]: https://en.wikipedia.org/wiki/Component_Object_Model
 [DLL]: https://en.wikipedia.org/wiki/Dynamic-link_library
 [eapodev]: https://sourceforge.net/p/equalizerapo/wiki/Developer%20documentation/
@@ -209,9 +246,13 @@ In code, the proper way to enumerate audio endpoints is to use
 [DSP]: https://en.wikipedia.org/wiki/Digital_signal_processing
 [`IAudioSystemEffects`]: https://docs.microsoft.com/en-us/windows/win32/api/audioenginebaseapo/nn-audioenginebaseapo-iaudiosystemeffects
 [inf]: https://docs.microsoft.com/en-us/windows-hardware/drivers/audio/implementing-audio-processing-objects#registering-apos-for-processing-modes-and-effects-in-the-inf-file
+[infsettings]: https://docs.microsoft.com/en-us/windows-hardware/drivers/audio/media-class-inf-extensions
 [Kernel Streaming]: https://docs.microsoft.com/en-us/windows-hardware/drivers/stream/kernel-streaming
 [MME]: https://en.wikipedia.org/wiki/Windows_legacy_audio_components#Multimedia_Extensions_(MME)
 [mode]: https://docs.microsoft.com/en-us/windows-hardware/drivers/audio/audio-signal-processing-modes
+[`PKEY_FX_EndpointEffectClsid`]: https://docs.microsoft.com/en-us/windows-hardware/drivers/audio/pkey-fx-endpointeffectclsid
+[`PKEY_FX_ModeEffectClsid`]: https://docs.microsoft.com/en-us/windows-hardware/drivers/audio/pkey-fx-modeeffectclsid
+[`PKEY_FX_StreamEffectClsid`]: https://docs.microsoft.com/en-us/windows-hardware/drivers/audio/pkey-fx-streameffectclsid
 [process]: https://docs.microsoft.com/en-us/windows/win32/api/audioenginebaseapo/nf-audioenginebaseapo-iaudioprocessingobjectrt-apoprocess
 [regsvr32]: https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/regsvr32
 [vista]: https://download.microsoft.com/download/9/c/5/9c5b2167-8017-4bae-9fde-d599bac8184a/sysfx.doc
@@ -219,3 +260,5 @@ In code, the proper way to enumerate audio endpoints is to use
 [arch]: https://docs.microsoft.com/en-us/windows-hardware/drivers/audio/windows-audio-architecture
 [WASAPI]: https://docs.microsoft.com/en-us/windows/desktop/coreaudio/wasapi
 [WASAPI Exclusive]: https://docs.microsoft.com/en-us/windows/win32/coreaudio/exclusive-mode-streams
+[Windows Property System]: https://docs.microsoft.com/en-us/windows/win32/properties/windows-properties-system
+[Windows SDK]: https://developer.microsoft.com/en-us/windows/downloads/windows-sdk/
