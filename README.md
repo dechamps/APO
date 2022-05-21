@@ -215,6 +215,11 @@ If any of SFX, MFX or EFX are present, then LFX and GFX are ignored.
 All properties are optional. If no properties are present, or if the
 `FxProperties` key is absent entirely, then no system effect APOs are used.
 
+Another notable property is [`PKEY_AudioEndpoint_Disable_SysFx`][]
+(`{1da5d803-d492-4edd-8c23-e0c0ffee7f0e},5`, DWORD), which, if set to 1,
+disables all sAPOs. It is mapped to the "Enable audio enhancements" checkbox in
+the Windows audio device settings.
+
 ## Useful links
 
 - [Windows Audio Architecture][arch]
@@ -250,6 +255,7 @@ All properties are optional. If no properties are present, or if the
 [Kernel Streaming]: https://docs.microsoft.com/en-us/windows-hardware/drivers/stream/kernel-streaming
 [MME]: https://en.wikipedia.org/wiki/Windows_legacy_audio_components#Multimedia_Extensions_(MME)
 [mode]: https://docs.microsoft.com/en-us/windows-hardware/drivers/audio/audio-signal-processing-modes
+[`PKEY_AudioEndpoint_Disable_SysFx`]: https://docs.microsoft.com/en-us/windows/win32/coreaudio/pkey-audioendpoint-disable-sysfx
 [`PKEY_FX_EndpointEffectClsid`]: https://docs.microsoft.com/en-us/windows-hardware/drivers/audio/pkey-fx-endpointeffectclsid
 [`PKEY_FX_ModeEffectClsid`]: https://docs.microsoft.com/en-us/windows-hardware/drivers/audio/pkey-fx-modeeffectclsid
 [`PKEY_FX_StreamEffectClsid`]: https://docs.microsoft.com/en-us/windows-hardware/drivers/audio/pkey-fx-streameffectclsid
