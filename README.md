@@ -235,7 +235,7 @@ For example, the following command will look up information about CLSID
 sAPO:
 
 ```powershell
-$RegistryKey = (Get-Item "HKLM:\SOFTWARE\Classes\CLSID\{EC1CC9CE-FAED-4822-828A-82A81A6F018F}")
+$RegistryKey = Get-Item "HKLM:\SOFTWARE\Classes\CLSID\{EC1CC9CE-FAED-4822-828A-82A81A6F018F}"
 $RegistryKey.GetValue("")
 $RegistryKey.OpenSubKey("InprocServer32").GetValue("")
 ```
