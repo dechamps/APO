@@ -251,11 +251,11 @@ In this example `EqualizerAPO.dll` is the DLL that contains the sAPO code. The
 Windows Audio engine `audiodg.exe` process will load that DLL to instantiate the
 filter and process the audio.
 
-### How to remove all sAPOs
+### How to remove all sAPOs for an audio endpoint
 
 The following example command will delete all registry values directly under
 `FxProperties` for the `{2f716148-66dd-4afe-9698-d3c74eea039a}` endpoint GUID,
-thus removing all sAPO configuration:
+thus removing all sAPO configuration for that endpoint:
 
 ```powershell
 $RegistryKey = [Microsoft.Win32.Registry]::LocalMachine.OpenSubKey(
