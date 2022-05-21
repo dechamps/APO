@@ -220,6 +220,54 @@ Another notable property is [`PKEY_AudioEndpoint_Disable_SysFx`][]
 disables all sAPOs. It is mapped to the "Enable audio enhancements" checkbox in
 the Windows audio device settings.
 
+### How to remove all sAPOs
+
+The following example command will delete all registry values directly under
+`FxProperties` for the `{2f716148-66dd-4afe-9698-d3c74eea039a}` endpoint GUID,
+thus removing all sAPO configuration:
+
+```powershell
+$RegistryKey = [Microsoft.Win32.Registry]::LocalMachine.OpenSubKey(
+  "SOFTWARE\Microsoft\Windows\CurrentVersion\MMDevices\Audio\Render\{2f716148-66dd-4afe-9698-d3c74eea039a}\FxProperties",
+  [Microsoft.Win32.RegistryKeyPermissionCheck]::ReadWriteSubTree,
+  [System.Security.AccessControl.RegistryRights]::QueryValues -bor [System.Security.AccessControl.RegistryRights]::SetValue)
+$RegistryKey.GetValueNames() | ForEach-Object { $RegistryKey.DeleteValue($_) }
+```
+
+You can use the Registry Editor to make a backup of the contents of the registry
+key before running the above command so that you can restore them later. Another
+way to revert to the default state is to reinstall the audio driver.
+
+The same result by deleting or renaming the `FxProperties` key, but permissions
+might get in the way (see below).
+
+### Permission issues
+
+By default, special permissions apply to the overall `MMDevices` registry key.
+The only user with full control of that key is `TrustedInstaller`. Even
+Administrators have restricted permissions: they can add, modify and remove
+registry values, but they cannot change the keys.
+
+This can prevent certain useful operations such as deleting or renaming the
+`FxProperties` key.
+
+Fixing the permissions from the command line is surprisingly hard for a number
+of silly technical reasons. Namely: there is no easy way to run commands under
+the `TrustedInstaller` user or to enable the `TakeOwnership` [privilege][]
+without the help of external tools, and built-in tools such as [takeown][]
+cannot be used on the registry.
+
+However, it is possible to fix the permissions manually using the Registry
+Editor (`regedit`):
+
+1. Navigate to `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\MMDevices\Audio`.
+2. Open the permissions of the `Audio` registry key and change its owner to the
+   Administrators group.
+3. Give the Administrators group Full Control over the registry key.
+
+You should then be able to make any change you like, including deleting and
+renaming `FxProperties` keys.
+
 ## Useful links
 
 - [Windows Audio Architecture][arch]
@@ -259,8 +307,10 @@ the Windows audio device settings.
 [`PKEY_FX_EndpointEffectClsid`]: https://docs.microsoft.com/en-us/windows-hardware/drivers/audio/pkey-fx-endpointeffectclsid
 [`PKEY_FX_ModeEffectClsid`]: https://docs.microsoft.com/en-us/windows-hardware/drivers/audio/pkey-fx-modeeffectclsid
 [`PKEY_FX_StreamEffectClsid`]: https://docs.microsoft.com/en-us/windows-hardware/drivers/audio/pkey-fx-streameffectclsid
+[privilege]: https://docs.microsoft.com/en-us/windows/win32/secauthz/privilege-constants
 [process]: https://docs.microsoft.com/en-us/windows/win32/api/audioenginebaseapo/nf-audioenginebaseapo-iaudioprocessingobjectrt-apoprocess
 [regsvr32]: https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/regsvr32
+[takeown]: https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/takeown
 [vista]: https://download.microsoft.com/download/9/c/5/9c5b2167-8017-4bae-9fde-d599bac8184a/sysfx.doc
 [VST]: https://en.wikipedia.org/wiki/Virtual_Studio_Technology
 [arch]: https://docs.microsoft.com/en-us/windows-hardware/drivers/audio/windows-audio-architecture
