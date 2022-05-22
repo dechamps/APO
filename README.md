@@ -50,7 +50,7 @@ inserted at various points inside the Windows audio engine pipeline. sAPOs can
 be extremely useful because they can be used to arbitrarily filter audio for
 all Windows applications running system-wide; and because they run directly
 inside the Windows audio engine, they can do so in a very clean and efficient
-manner with zero additional latency.
+manner with no additional conversions and zero additional latency.
 
 sAPOs can be [positioned][apoarch] to filter audio data at the following stages
 of the Windows audio pipeline:
