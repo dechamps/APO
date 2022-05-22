@@ -300,6 +300,16 @@ Editor (`regedit`):
 You should then be able to make any change you like, including creating,
 deleting and renaming `FxProperties` keys.
 
+### Applying the changes
+
+The relevant registry entries are consumed by the Windows Audio service
+(`audiosrv`). To make sure changes are picked up, the service usually needs to
+be restarted:
+
+```powershell
+Restart-Service -Name audiosrv
+```
+
 ## Useful links
 
 - [Windows Audio Architecture][arch]
