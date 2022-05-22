@@ -279,8 +279,9 @@ The only user with full control of that key is `TrustedInstaller`. Even
 Administrators have restricted permissions: they can add, modify and remove
 registry values, but they cannot change the keys.
 
-This can prevent certain useful operations such as deleting or renaming the
-`FxProperties` key.
+This can prevent certain useful operations on the `FxProperties` key, such as
+deleting or renaming it, or even creating it in the first place (which is
+necessary in order to add sAPOs to an endpoint that never had any).
 
 Fixing the permissions from the command line is surprisingly hard for a number
 of silly technical reasons. Namely: there is no easy way to run commands under
@@ -296,8 +297,8 @@ Editor (`regedit`):
    Administrators group.
 3. Give the Administrators group Full Control over the registry key.
 
-You should then be able to make any change you like, including deleting and
-renaming `FxProperties` keys.
+You should then be able to make any change you like, including creating,
+deleting and renaming `FxProperties` keys.
 
 ## Useful links
 
