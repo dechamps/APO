@@ -272,7 +272,7 @@ way to revert to the default state is to reinstall the audio driver.
 The same result can be achieved by deleting or renaming the `FxProperties` key,
 but permissions might get in the way (see below).
 
-### Permission issues
+### Registry permission issues
 
 By default, special permissions apply to the overall `MMDevices` registry key.
 The only user with full control of that key is `TrustedInstaller`. Even
@@ -310,6 +310,79 @@ be restarted:
 Restart-Service -Name audiosrv
 ```
 
+## Access rights, permissions, ACL issues when running APOs
+
+As previously explained, APOs run inside the `audiodg.exe` process which itself
+runs under the Windows Audio Service (`Audiosrv`).
+
+This service, like virtually all services, does *not* run under your normal
+Windows user account. Instead, its [access token][] gives it permissions that
+are roughly equivalent to the [LocalService][] account.
+
+Most notably, for security and isolation reasons, the service does *not* have
+access to your user directory (i.e. `C:\Users\<username>`).
+
+In some cases this can lead to an APO misbehaving because it is attempting to
+open a file (or other [securable object][], such as a registry key) that it is
+not allowed to access.
+
+One example is attempting to store an [Equalizer APO][] configuration file
+inside a user directory. The Equalizer APO Configuration Editor will display a
+helpful warning in this case, and the APO itself will log an error message into
+its logfile (`C:\Windows\ServiceProfiles\LocalService\AppData\Local\Temp\EqualizerAPO.log`).
+
+In other cases the issue might be harder to troubleshoot. For example, most
+[VSTs][VST] do not anticipate running into permission issues. When such VSTs are
+used inside Equalizer APO (for example) and run into unexpected access issues,
+the resulting behaviour can be erratic and hard to troubleshoot.
+
+### Troubleshooting access control issues
+
+One way to confirm that an APO is having trouble accessing specific objects is
+to use [Process Monitor][]. Use the following filters:
+
+- "Process Name" is `audiodg.exe`
+- "Result" is `ACCESS DENIED`
+
+Then restart the Windows Audio service and start streaming audio. Access denied
+errors should then appear in Process Monitor.
+
+The following example shows Equalizer APO attempting to open an inaccessible
+configuration file:
+
+![](ProcessMonitor-AccessDenied.png)
+
+It is possible to determine which DLL is making the offending calls by looking
+at the *event stack* in Process Monitor. In this example it is
+`EqualizerAPO.dll`, as expected. If the failure originates from a VST used
+within Equalizer APO, the stack should mention the offending VST DLL alongside
+(or instead of) Equalizer APO.
+
+![](ProcessMonitor-Stack.png)
+
+### Fixing access control issues
+
+There are two ways to fix this issue:
+
+- Move the offending files/objects in a location that the Audio service can
+  access. For example Program Files or ProgramData. Or:
+- Change the permissions ([DACL][]) on the offending files/objects to allow
+  access by the Audio service.
+
+To adjust the permissions, go to the Security properties of the offending
+file/object (or a parent) and ensure the `NT SERVICE\Audiosrv` user principal
+has access. (This principal is the [service SID][]. You can also use the local
+service account, but only allowing the Windows audio service is cleaner.)
+
+![](Permissions-Audiosrv.png)
+
+Then restart the Windows Audio service.
+
+**Note:** while this technique can be used to store Equalizer APO configuration
+files outside of the standard `config` directory, keep in mind that doing so
+will break the Equalizer APO "instant mode" feature (i.e. live changes) because
+Equalizer APO only watches its `config` directory for changes.
+
 ## Useful links
 
 - [Windows Audio Architecture][arch]
@@ -321,6 +394,7 @@ Restart-Service -Name audiosrv
   of the deprecated LFX and GFX APO placements)
 - [Enumerate APOs][enum]
 
+[access token]: https://docs.microsoft.com/en-us/windows/win32/secauthz/access-tokens
 [apo]: https://docs.microsoft.com/en-us/windows-hardware/drivers/audio/audio-processing-object-architecture
 [apoarch]: https://docs.microsoft.com/en-us/windows-hardware/drivers/audio/audio-processing-object-architecture#audio-processing-objects-architecture
 [apodesign]: https://docs.microsoft.com/en-us/windows-hardware/drivers/audio/implementing-audio-processing-objects#design-considerations-for-custom-apo-development
@@ -329,6 +403,7 @@ Restart-Service -Name audiosrv
 [bundled]: https://docs.microsoft.com/en-us/windows-hardware/drivers/audio/audio-signal-processing-modes#audio-effects
 [CLSID]: https://docs.microsoft.com/en-us/windows/win32/com/com-class-objects-and-clsids
 [COM]: https://en.wikipedia.org/wiki/Component_Object_Model
+[DACL]: https://docs.microsoft.com/en-us/windows/win32/secauthz/dacls-and-aces
 [DLL]: https://en.wikipedia.org/wiki/Dynamic-link_library
 [eapodev]: https://sourceforge.net/p/equalizerapo/wiki/Developer%20documentation/
 [endpoint]: https://docs.microsoft.com/en-us/windows/win32/coreaudio/audio-endpoint-devices
@@ -343,6 +418,7 @@ Restart-Service -Name audiosrv
 [inf]: https://docs.microsoft.com/en-us/windows-hardware/drivers/audio/implementing-audio-processing-objects#registering-apos-for-processing-modes-and-effects-in-the-inf-file
 [infsettings]: https://docs.microsoft.com/en-us/windows-hardware/drivers/audio/media-class-inf-extensions
 [Kernel Streaming]: https://docs.microsoft.com/en-us/windows-hardware/drivers/stream/kernel-streaming
+[LocalService]: https://docs.microsoft.com/en-us/windows/win32/services/localservice-account
 [MME]: https://en.wikipedia.org/wiki/Windows_legacy_audio_components#Multimedia_Extensions_(MME)
 [mode]: https://docs.microsoft.com/en-us/windows-hardware/drivers/audio/audio-signal-processing-modes
 [`PKEY_AudioEndpoint_Disable_SysFx`]: https://docs.microsoft.com/en-us/windows/win32/coreaudio/pkey-audioendpoint-disable-sysfx
@@ -351,7 +427,10 @@ Restart-Service -Name audiosrv
 [`PKEY_FX_StreamEffectClsid`]: https://docs.microsoft.com/en-us/windows-hardware/drivers/audio/pkey-fx-streameffectclsid
 [privilege]: https://docs.microsoft.com/en-us/windows/win32/secauthz/privilege-constants
 [process]: https://docs.microsoft.com/en-us/windows/win32/api/audioenginebaseapo/nf-audioenginebaseapo-iaudioprocessingobjectrt-apoprocess
+[Process Monitor]: https://docs.microsoft.com/en-us/sysinternals/downloads/procmon
 [regsvr32]: https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/regsvr32
+[securable object]: https://docs.microsoft.com/en-us/windows/win32/secauthz/securable-objects
+[service SID]: https://sourcedaddy.com/windows-7/understanding-service-sids.html
 [takeown]: https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/takeown
 [vista]: https://download.microsoft.com/download/9/c/5/9c5b2167-8017-4bae-9fde-d599bac8184a/sysfx.doc
 [VST]: https://en.wikipedia.org/wiki/Virtual_Studio_Technology
