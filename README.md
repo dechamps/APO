@@ -360,6 +360,13 @@ within Equalizer APO, the stack should mention the offending VST DLL alongside
 
 ![](ProcessMonitor-Stack.png)
 
+Some issues can be more subtle. For example some VSTs might expect to find files
+or registry entries under the *current* user profile. These objects might exist
+under your personal user profile, but not in the local service user profile. To
+troubleshoot such issues you might need to widen your search and expand your
+Process Monitor filters to include more failure modes, such as "not found"
+errors.
+
 ### Fixing access control issues
 
 There are two ways to fix this issue:
